@@ -1,0 +1,2 @@
+from findlib import MediaObject
+
