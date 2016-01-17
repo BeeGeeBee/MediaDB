@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Delete {{statictitle}}{% endblock title %}
+{% block main %}
+{% if form == None %}
+    <a>Deleting element {{statictitle}} is not supported.</a>
+{% else %}
+<script type="text/javascript">
+    function redirect()
+    {
+    var url = "/maintstaticdata/{{statictitle}}"
+    window.location.href=url ;
+    }
+</script>
+    <a style="color:black">Delete {{statictitle}}.</a>
+    <form method="post" action="/delete/{{statictitle}}/{{elementid}}">
+      <fieldset disabled="disabled">
+          <table>
+              {% for field in form %}
+              <tr><td>{{ field.label }}</td><td>{{ field }}</td></tr>
+              {% endfor %}
+          </table>
+
+      </fieldset>
+        <p><input type=submit value=Delete><input type="button" onclick="redirect()" value="Cancel">
+    </form>
+{% endif %}
+{% endblock main %}
