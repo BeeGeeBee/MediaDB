@@ -150,3 +150,40 @@ class MediaTestCase(unittest.TestCase):
         mediatest.barcode = '5030305514860'
         response = mediatest.getbybarcode()
         assert '<OK>Gnomeo & Juliet [DVD]:' in response
+
+# Maintain media
+    def test_02_maintmedia(self):
+        rv = self.app.get('/maintstaticdata/media/Books')
+        print rv.data
+        # Page labelled correctly
+        assert 'Maintain Media-Books' in rv.data
+        # Page displays current books
+        assert 'Test Book Media' in rv.data
+        # Page contains a delete option column.
+        assert 'Delete' in rv.data
+        # Page contains an update option column.
+        assert 'Updt' in rv.data
+        # Page gives the option to add a book
+        assert '"addButton"' in rv.data
+        # Table should not have a Used By header
+        assert 'Used By' not in rv.data
+        # Add a book
+        rv = self.app.post('/add/component', data=dict(
+            title='Test book',
+            description='This is a test book',
+            mediatype='3',
+            location='1'
+        ))
+        assert 'Test book' in rv.data
+        assert 'This is a test book' in rv.data
+        # Check delete option available
+        assert '"/delete/component/4"' in rv.data
+        # Update the book.
+        rv = self.app.post('/update/media/4', data=dict(
+                title='Updated Test'
+            ))
+        assert 'Updated media Updated Test' in rv.data
+        # Delete this new media
+        rv = self.app.post('/delete/media/4')
+        assert 'Successfully deleted ID 4 Updated Test' in rv.data
+

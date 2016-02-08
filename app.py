@@ -20,9 +20,9 @@ session = createdbsession(config.get('Database', 'Name'),
                           cleardown=False)
 
 
-def chooseobject(option=None):
+def chooseobject(option=None, *args):
     if option == 'media':
-        obj = MediaObject(session)
+        obj = MediaObject(session, args[0])
     elif option == 'location':
         obj = LocationObject(session, Locations)
     else:
@@ -32,7 +32,7 @@ def chooseobject(option=None):
 
 def createstaticquery(querymodel):
     queryobj = session.query(querymodel). \
-        order_by(querymodel.name)
+        order_by(querymodel.title)
     return queryobj
 
 
@@ -42,16 +42,17 @@ def initstaticform(formtemplate=BasicForm):
 
 def populatelist(option, *args):
     form = []
-    querytable = Locations
-    pagetitle = 'Locations'
+    option, querytable, pagetitle = setquerytable(option)
     if option is None:
         form.append(initstaticform())
+    if args[0] is not None:
+        pagetitle = pagetitle + '-' + args[0]
     queryobj = createstaticquery(querytable)
     deleteoption = []
     addfeatureoption = []
     addcategoryoption = []
     updateoption = []
-    optionobject = chooseobject(option)
+    optionobject = chooseobject(option, args[0])
     for data_row in queryobj:
         form.append(optionobject.loadform(data_row, True))
         form[-1].media.data = optionobject.checkusage(data_row.locationid)
@@ -194,10 +195,10 @@ def datamaintmenu():
     return render_template('menu.html', menu=menu, numrows=len(menu.url))
 
 
-@app.route("/maintstaticdata/<option>", methods=['GET', 'POST'])
-def maintstaticdata(option='media'):
+@app.route("/maintstaticdata/<option>/<mediatype>", methods=['GET', 'POST'])
+def maintstaticdata(option='media', mediatype=None):
     (option, pagetitle, form, deleteoptions, addfeatureoptions, categoriesopt, updateoption) = \
-        populatelist(option)
+        populatelist(option, mediatype)
     return render_template('maintstatic.html', statictitle=pagetitle, form=form,
                            numrows=len(form), option=option, deleteoption=deleteoptions,
                            featureoption=addfeatureoptions, categoryoption=categoriesopt, updateoption=updateoption)

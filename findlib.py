@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import func
 from models import Base, Media, Locations
-from forms import LocationsForm
+from forms import LocationsForm, MediaForm
 
 ERRNoFileName = 1
 ERRFileNotFound = 2
@@ -40,13 +40,14 @@ def createdbsession(dbname=None, sqlecho=None, cleardown=False):
 
 
 class MediaObject(object):
-    def __init__(self, category=None):
+    def __init__(self, category=None, mediatype='Book'):
         self.barcode = None
         self.name = ''
         self.url = ''
         self.category = category
         self.keywords = ''
         self.tree = ''
+        self.mediatype = mediatype
 
     def getbybarcode(self):
         if not self.barcode:
@@ -71,6 +72,21 @@ class MediaObject(object):
         parts = [s.lstrip() for s in titles[0].split(':')]
         self.name = parts[0]
         return '<OK>{}'.format(titles[0])
+
+    def loadform(self, *argv):
+        arglst = []
+        for arg in argv:
+            arglst.append(arg)
+        componentdata = arglst[0]
+        form = MediaForm()
+        form.title.data = componentdata.title
+        form.description.data = componentdata.description
+        form.url.data = componentdata.url
+        form.barcode.data = componentdata.barcode
+        return form
+
+    def checkusage(self, locationid):
+        return
 
 
 class HtmlMenu(object):
